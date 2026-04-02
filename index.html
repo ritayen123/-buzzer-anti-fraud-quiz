@@ -241,7 +241,7 @@
         </div>
 
         <div class="footer">
-            <p>由 <a href="https://buzzer.global" target="_blank">Buzzer 蜂任務</a> 製作</p>
+            <p>由 <a href="https://buzzer.global" target="_blank" rel="noopener noreferrer">Buzzer 蜂任務</a> 製作</p>
         </div>
     </div>
 
@@ -370,7 +370,13 @@
             currentQuestion.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.innerHTML = `<span class="label">${labels[i]}</span><span>${opt}</span>`;
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'label';
+                labelSpan.textContent = labels[i];
+                const textSpan = document.createElement('span');
+                textSpan.textContent = opt;
+                btn.appendChild(labelSpan);
+                btn.appendChild(textSpan);
                 btn.onclick = () => selectAnswer(i);
                 optionsEl.appendChild(btn);
             });
@@ -394,12 +400,24 @@
                 }
             });
 
+            const icon = document.createElement('span');
+            icon.className = 'icon';
+            const explanation = document.createElement('span');
+            explanation.className = 'explanation';
+            explanation.textContent = currentQuestion.explanation;
+
             if (isCorrect) {
                 feedbackEl.className = 'feedback correct';
-                feedbackEl.innerHTML = `<span class="icon">&#10003;</span> 答對了！你有很好的防詐意識！<span class="explanation">${currentQuestion.explanation}</span>`;
+                icon.textContent = '\u2713';
+                feedbackEl.appendChild(icon);
+                feedbackEl.append(' 答對了！你有很好的防詐意識！');
+                feedbackEl.appendChild(explanation);
             } else {
                 feedbackEl.className = 'feedback wrong';
-                feedbackEl.innerHTML = `<span class="icon">&#10007;</span> 答錯了！要小心這類詐騙手法喔！<span class="explanation">${currentQuestion.explanation}</span>`;
+                icon.textContent = '\u2717';
+                feedbackEl.appendChild(icon);
+                feedbackEl.append(' 答錯了！要小心這類詐騙手法喔！');
+                feedbackEl.appendChild(explanation);
             }
         }
 
