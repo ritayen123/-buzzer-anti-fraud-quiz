@@ -205,6 +205,31 @@
         }
 
 
+        /* CTA Button */
+        .cta-btn {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: #84AF4D;
+            color: #fff;
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .cta-btn:hover {
+            background: #6f9a3d;
+        }
+
+        .cta-btn.show {
+            display: block;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -238,6 +263,7 @@
             <div class="question-text" id="questionText"></div>
             <div class="options" id="options"></div>
             <div class="feedback" id="feedback"></div>
+            <button class="cta-btn" id="ctaBtn">繼續遊戲</button>
         </div>
 
         <div class="footer">
@@ -246,7 +272,8 @@
     </div>
 
     <script>
-        const questions = [
+        // ===== 硬編碼題庫（API 失敗時的 fallback）=====
+        var fallbackQuestions = [
             {
                 question: "你收到一則簡訊說：「你的包裹無法投遞，請點擊連結確認地址。」你應該怎麼做？",
                 options: [
@@ -359,25 +386,68 @@
             }
         ];
 
-        let answered = false;
-        const currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+        // ===== 設定 =====
+        // 部署 Apps Script 後，將網址貼在這裡
+        var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1orjrC2k1hhwauxfkxtGVcIo4KjpQCQ0y-I4VN4F2KLsdX1f1C8MFCzn1Tzkv8j5r1g/exec';
+        // 預設取題數（可被 URL 參數 count 覆蓋）
+        var DEFAULT_COUNT = 1;
 
-        function init() {
+        // ===== URL 參數解析 =====
+        var urlParams = new URLSearchParams(window.location.search);
+        var requestId = urlParams.get('requestId');
+        var successUrlPrefix = urlParams.get('successUrlPrefix');
+        var paramTag = urlParams.get('tag') || '';
+        var paramCount = parseInt(urlParams.get('count'), 10) || DEFAULT_COUNT;
+
+        var answered = false;
+        var currentQuestion = null;
+
+        // ===== 從 API 取題，失敗則 fallback =====
+        function fetchQuestions() {
+            if (!APPS_SCRIPT_URL) {
+                startQuiz(pickFromFallback());
+                return;
+            }
+
+            var apiUrl = APPS_SCRIPT_URL + '?count=' + paramCount;
+            if (paramTag) apiUrl += '&tag=' + encodeURIComponent(paramTag);
+
+            fetch(apiUrl)
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.questions && data.questions.length > 0) {
+                        startQuiz(data.questions[0]);
+                    } else {
+                        startQuiz(pickFromFallback());
+                    }
+                })
+                .catch(function () {
+                    startQuiz(pickFromFallback());
+                });
+        }
+
+        function pickFromFallback() {
+            return fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
+        }
+
+        // ===== 渲染題目 =====
+        function startQuiz(question) {
+            currentQuestion = question;
             document.getElementById('questionText').textContent = currentQuestion.question;
 
-            const optionsEl = document.getElementById('options');
-            const labels = ['A', 'B', 'C', 'D'];
-            currentQuestion.options.forEach((opt, i) => {
-                const btn = document.createElement('button');
+            var optionsEl = document.getElementById('options');
+            var labels = ['A', 'B', 'C', 'D'];
+            currentQuestion.options.forEach(function (opt, i) {
+                var btn = document.createElement('button');
                 btn.className = 'option-btn';
-                const labelSpan = document.createElement('span');
+                var labelSpan = document.createElement('span');
                 labelSpan.className = 'label';
                 labelSpan.textContent = labels[i];
-                const textSpan = document.createElement('span');
+                var textSpan = document.createElement('span');
                 textSpan.textContent = opt;
                 btn.appendChild(labelSpan);
                 btn.appendChild(textSpan);
-                btn.onclick = () => selectAnswer(i);
+                btn.onclick = function () { selectAnswer(i); };
                 optionsEl.appendChild(btn);
             });
         }
@@ -386,11 +456,11 @@
             if (answered) return;
             answered = true;
 
-            const allBtns = document.querySelectorAll('.option-btn');
-            const feedbackEl = document.getElementById('feedback');
-            const isCorrect = index === currentQuestion.answer;
+            var allBtns = document.querySelectorAll('.option-btn');
+            var feedbackEl = document.getElementById('feedback');
+            var isCorrect = index === currentQuestion.answer;
 
-            allBtns.forEach((btn, i) => {
+            allBtns.forEach(function (btn, i) {
                 if (i === currentQuestion.answer) {
                     btn.classList.add('correct');
                 } else if (i === index && !isCorrect) {
@@ -400,9 +470,9 @@
                 }
             });
 
-            const icon = document.createElement('span');
+            var icon = document.createElement('span');
             icon.className = 'icon';
-            const explanation = document.createElement('span');
+            var explanation = document.createElement('span');
             explanation.className = 'explanation';
             explanation.textContent = currentQuestion.explanation;
 
@@ -419,9 +489,20 @@
                 feedbackEl.append(' 答錯了！要小心這類詐騙手法喔！');
                 feedbackEl.appendChild(explanation);
             }
+
+            // Show CTA only when in revive flow (has successUrlPrefix)
+            if (successUrlPrefix) {
+                var ctaBtn = document.getElementById('ctaBtn');
+                ctaBtn.classList.add('show');
+                ctaBtn.addEventListener('click', function () {
+                    window.location.href = successUrlPrefix +
+                        '?requestId=' + encodeURIComponent(requestId) +
+                        '&ts=' + Date.now();
+                });
+            }
         }
 
-        init();
+        fetchQuestions();
     </script>
 </body>
 </html>
