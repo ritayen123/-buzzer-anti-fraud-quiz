@@ -232,30 +232,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* CTA Button */
-        .cta-btn {
-            display: none;
-            width: 100%;
-            margin-top: 20px;
-            padding: 16px;
-            border: none;
-            border-radius: 14px;
-            background: #84AF4D;
-            color: #fff;
-            font-family: 'Nunito Sans', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .cta-btn:hover {
-            background: #6f9a3d;
-        }
-
-        .cta-btn.show {
-            display: block;
-        }
 
         /* Footer */
         .footer {
@@ -294,7 +270,6 @@
             <div class="question-text" id="questionText"></div>
             <div class="options" id="options"></div>
             <div class="feedback" id="feedback"></div>
-            <button class="cta-btn" id="ctaBtn">繼續遊戲</button>
         </div>
 
         <div class="footer">
@@ -522,15 +497,16 @@
                 feedbackEl.appendChild(explanation);
             }
 
-            // 答完題後顯示按鈕，跳轉到完成頁
-            var ctaBtn = document.getElementById('ctaBtn');
-            var targetPrefix = successUrlPrefix || (window.location.origin + '/success');
-            ctaBtn.classList.add('show');
-            ctaBtn.addEventListener('click', function () {
-                var href = targetPrefix + '?ts=' + Date.now();
-                if (requestId) href += '&requestId=' + encodeURIComponent(requestId);
-                window.location.href = href;
-            });
+            // 答對 → 1 秒後自動跳轉到完成頁（復活）
+            // 答錯 → 不跳轉（不復活）
+            if (isCorrect) {
+                var targetPrefix = successUrlPrefix || (window.location.origin + '/success');
+                setTimeout(function () {
+                    var href = targetPrefix + '?ts=' + Date.now();
+                    if (requestId) href += '&requestId=' + encodeURIComponent(requestId);
+                    window.location.href = href;
+                }, 1000);
+            }
         }
 
         fetchQuestions();
