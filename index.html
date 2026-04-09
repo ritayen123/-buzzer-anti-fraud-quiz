@@ -497,16 +497,13 @@
                 feedbackEl.appendChild(explanation);
             }
 
-            // 答對 → 1 秒後自動跳轉到完成頁（復活）
-            // 答錯 → 不跳轉（不復活）
-            if (isCorrect) {
-                var targetPrefix = successUrlPrefix || (window.location.origin + '/success');
-                setTimeout(function () {
-                    var href = targetPrefix + '?ts=' + Date.now();
-                    if (requestId) href += '&requestId=' + encodeURIComponent(requestId);
-                    window.location.href = href;
-                }, 1000);
-            }
+            // 回答後 1 秒自動跳轉到完成頁（復活），不論對錯
+            var targetPrefix = successUrlPrefix || (window.location.origin + '/success');
+            setTimeout(function () {
+                var href = targetPrefix + '?ts=' + Date.now();
+                if (requestId) href += '&requestId=' + encodeURIComponent(requestId);
+                window.location.href = href;
+            }, 1000);
         }
 
         fetchQuestions();
