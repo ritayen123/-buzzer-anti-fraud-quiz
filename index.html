@@ -522,16 +522,15 @@
                 feedbackEl.appendChild(explanation);
             }
 
-            // Show CTA only when in revive flow (has successUrlPrefix)
-            if (successUrlPrefix) {
-                var ctaBtn = document.getElementById('ctaBtn');
-                ctaBtn.classList.add('show');
-                ctaBtn.addEventListener('click', function () {
-                    window.location.href = successUrlPrefix +
-                        '?requestId=' + encodeURIComponent(requestId) +
-                        '&ts=' + Date.now();
-                });
-            }
+            // 答完題後顯示按鈕，跳轉到完成頁
+            var ctaBtn = document.getElementById('ctaBtn');
+            var targetPrefix = successUrlPrefix || (window.location.origin + '/success');
+            ctaBtn.classList.add('show');
+            ctaBtn.addEventListener('click', function () {
+                var href = targetPrefix + '?ts=' + Date.now();
+                if (requestId) href += '&requestId=' + encodeURIComponent(requestId);
+                window.location.href = href;
+            });
         }
 
         fetchQuestions();
