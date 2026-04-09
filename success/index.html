@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>答題完成 | Buzzer 蜂任務</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: #f5f7f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 48px 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+        .icon {
+            width: 64px;
+            height: 64px;
+            background: #f2f9e8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #2d2d2d;
+            margin-bottom: 12px;
+        }
+        p {
+            font-size: 15px;
+            color: #888;
+            line-height: 1.6;
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .footer a {
+            color: #84AF4D;
+            text-decoration: none;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">&#10003;</div>
+            <h1>答題完成！</h1>
+            <p>請返回 APP 繼續遊戲</p>
+        </div>
+        <div class="footer">
+            <p>由 <a href="https://buzzer.global" target="_blank" rel="noopener noreferrer">Buzzer 蜂任務</a> 製作</p>
+        </div>
+    </div>
+</body>
+</html>
