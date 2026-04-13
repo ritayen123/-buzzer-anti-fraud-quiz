@@ -401,12 +401,25 @@
         // ===== URL 參數解析 =====
         var urlParams = new URLSearchParams(window.location.search);
         var requestId = urlParams.get('requestId');
-        var successUrlPrefix = urlParams.get('successUrlPrefix');
+        var reviveSource = urlParams.get('reviveSource');
         var paramTag = urlParams.get('tag') || '';
         var paramCount = parseInt(urlParams.get('count'), 10) || DEFAULT_COUNT;
 
         var answered = false;
         var currentQuestion = null;
+
+        // ===== iframe postMessage =====
+        var GAME_ORIGIN = 'https://d2fz32630h5f3w.cloudfront.net';
+        var isInIframe = window.parent !== window;
+
+        function notifyParent(type, extra) {
+            if (!isInIframe) return;
+            var msg = { type: type, requestId: requestId };
+            if (extra) {
+                for (var key in extra) { msg[key] = extra[key]; }
+            }
+            window.parent.postMessage(msg, GAME_ORIGIN);
+        }
 
         // ===== 從 API 取題，失敗則 fallback =====
         function fetchQuestions() {
@@ -428,6 +441,7 @@
                     }
                 })
                 .catch(function () {
+                    // API 失敗仍有 fallback 題庫，不算致命錯誤
                     startQuiz(pickFromFallback());
                 });
         }
@@ -457,6 +471,9 @@
                 btn.onclick = function () { selectAnswer(i); };
                 optionsEl.appendChild(btn);
             });
+
+            // 通知遊戲頁表單已 ready
+            notifyParent('REVIVE_FORM_READY');
         }
 
         function selectAnswer(index) {
@@ -497,12 +514,17 @@
                 feedbackEl.appendChild(explanation);
             }
 
-            // 回答後 1 秒自動跳轉到完成頁（復活），不論對錯
-            var targetPrefix = successUrlPrefix || (window.location.origin + '/success');
+            // 回答後 1 秒通知遊戲或跳轉
             setTimeout(function () {
-                var href = targetPrefix + '?ts=' + Date.now();
-                if (requestId) href += '&requestId=' + encodeURIComponent(requestId);
-                window.location.href = href;
+                if (isInIframe) {
+                    // Cocos iframe 方案：postMessage 通知遊戲
+                    notifyParent('REVIVE_FORM_COMPLETED');
+                } else {
+                    // 獨立瀏覽模式：跳轉到完成頁
+                    var href = window.location.origin + '/success?ts=' + Date.now();
+                    if (requestId) href += '&requestId=' + encodeURIComponent(requestId);
+                    window.location.href = href;
+                }
             }, 1000);
         }
 

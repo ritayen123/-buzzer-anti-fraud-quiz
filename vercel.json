@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://buzzer.global https://*.buzzer.global"
+          "value": "frame-ancestors 'self' https://buzzer.global https://*.buzzer.global https://d2fz32630h5f3w.cloudfront.net"
         },
         {
           "key": "X-Content-Type-Options",
@@ -14,10 +14,6 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "ALLOW-FROM https://buzzer.global"
         }
       ]
     }
