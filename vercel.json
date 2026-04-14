@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://buzzer.global https://*.buzzer.global https://d2fz32630h5f3w.cloudfront.net"
+          "value": "frame-ancestors 'self' https://buzzer.global https://*.buzzer.global https://d2fz32630h5f3w.cloudfront.net https://d39jhm1yaxz583.cloudfront.net"
         },
         {
           "key": "X-Content-Type-Options",
