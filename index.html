@@ -409,7 +409,10 @@
         var currentQuestion = null;
 
         // ===== iframe postMessage =====
-        var GAME_ORIGIN = 'https://d2fz32630h5f3w.cloudfront.net';
+        var ALLOWED_ORIGINS = [
+            'https://d2fz32630h5f3w.cloudfront.net',  // 正式站
+            'https://d39jhm1yaxz583.cloudfront.net'    // 測試站
+        ];
         var isInIframe = window.parent !== window;
 
         function notifyParent(type, extra) {
@@ -418,7 +421,10 @@
             if (extra) {
                 for (var key in extra) { msg[key] = extra[key]; }
             }
-            window.parent.postMessage(msg, GAME_ORIGIN);
+            // 向所有允許的 origin 發送，只有實際的父頁面會收到
+            ALLOWED_ORIGINS.forEach(function (origin) {
+                window.parent.postMessage(msg, origin);
+            });
         }
 
         // ===== 從 API 取題，失敗則 fallback =====
