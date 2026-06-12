@@ -30,8 +30,11 @@
  *   寫入欄位：時間 / userId / requestId / 題目 / 選擇選項 / 是否正確 / 標籤 / 來源
  */
 
+// 題庫試算表 ID（用 openById 不依賴專案綁定，部署帳號需有此試算表的編輯權限）
+var SPREADSHEET_ID = '1aBR3j8yFhjMmmZpLCcYHwul72ILU6LgQgReB8CzIXuY';
+
 function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('題庫');
+  var sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('題庫');
   var data = sheet.getDataRange().getValues();
   var tag = (e.parameter.tag || '').trim();
   var count = parseInt(e.parameter.count, 10) || 1;
@@ -75,7 +78,7 @@ function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.tryLock(5000);
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     var sheet = ss.getSheetByName('作答紀錄');
     if (!sheet) {
       sheet = ss.insertSheet('作答紀錄');

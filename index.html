@@ -393,8 +393,10 @@
         ];
 
         // ===== 設定 =====
-        // 部署 Apps Script 後，將網址貼在這裡
+        // 取題 API（舊部署，讀原題庫試算表）
         var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1orjrC2k1hhwauxfkxtGVcIo4KjpQCQ0y-I4VN4F2KLsdX1f1C8MFCzn1Tzkv8j5r1g/exec';
+        // 作答紀錄 API（新部署，寫入作答紀錄試算表）
+        var LOG_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_cccF3ynnqZXL_BxO0nrClO0SjU0q61Vtm9uxVarC-L0xfvNpcrdKRh1fo4M6xiEZ/exec';
         // 預設取題數（可被 URL 參數 count 覆蓋）
         var DEFAULT_COUNT = 1;
 
@@ -486,7 +488,7 @@
         // ===== 作答紀錄回存（fire-and-forget，失敗不影響作答流程）=====
         // body 用純字串（text/plain）避免 CORS preflight；keepalive 讓跳轉後請求仍送出
         function logAnswer(index, isCorrect) {
-            if (!APPS_SCRIPT_URL) return;
+            if (!LOG_SCRIPT_URL) return;
             var labels = ['A', 'B', 'C', 'D'];
             var payload = {
                 userId: paramUser,
@@ -498,7 +500,7 @@
                 source: isInIframe ? 'iframe' : 'standalone'
             };
             try {
-                fetch(APPS_SCRIPT_URL, {
+                fetch(LOG_SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify(payload),
                     keepalive: true
