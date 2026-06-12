@@ -404,6 +404,7 @@
         var reviveSource = urlParams.get('reviveSource');
         var paramTag = urlParams.get('tag') || '';
         var paramCount = parseInt(urlParams.get('count'), 10) || DEFAULT_COUNT;
+        var paramUser = urlParams.get('user') || '';
 
         var answered = false;
         var currentQuestion = null;
@@ -482,6 +483,29 @@
             notifyParent('REVIVE_FORM_READY');
         }
 
+        // ===== 作答紀錄回存（fire-and-forget，失敗不影響作答流程）=====
+        // body 用純字串（text/plain）避免 CORS preflight；keepalive 讓跳轉後請求仍送出
+        function logAnswer(index, isCorrect) {
+            if (!APPS_SCRIPT_URL) return;
+            var labels = ['A', 'B', 'C', 'D'];
+            var payload = {
+                userId: paramUser,
+                requestId: requestId || '',
+                question: currentQuestion.question,
+                selectedOption: labels[index] + '. ' + currentQuestion.options[index],
+                isCorrect: isCorrect,
+                tag: paramTag,
+                source: isInIframe ? 'iframe' : 'standalone'
+            };
+            try {
+                fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    keepalive: true
+                });
+            } catch (err) { /* 不擋作答 */ }
+        }
+
         function selectAnswer(index) {
             if (answered) return;
             answered = true;
@@ -489,6 +513,8 @@
             var allBtns = document.querySelectorAll('.option-btn');
             var feedbackEl = document.getElementById('feedback');
             var isCorrect = index === currentQuestion.answer;
+
+            logAnswer(index, isCorrect);
 
             allBtns.forEach(function (btn, i) {
                 if (i === currentQuestion.answer) {

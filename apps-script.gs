@@ -23,6 +23,11 @@
  *   G: 解說
  *   H: 標籤（例如 anti_fraud）
  *   I: 啟用（TRUE / FALSE）
+ *
+ * 作答紀錄（POST，工作表名稱：作答紀錄，不存在會自動建立）：
+ *   前端答題後 POST JSON：
+ *   { userId, requestId, question, selectedOption, isCorrect, tag, source }
+ *   寫入欄位：時間 / userId / requestId / 題目 / 選擇選項 / 是否正確 / 標籤 / 來源
  */
 
 function doGet(e) {
@@ -64,4 +69,39 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({ questions: selected }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(5000);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('作答紀錄');
+    if (!sheet) {
+      sheet = ss.insertSheet('作答紀錄');
+      sheet.appendRow(['時間', 'userId', 'requestId', '題目', '選擇選項', '是否正確', '標籤', '來源']);
+    }
+
+    var data = JSON.parse(e.postData.contents);
+    sheet.appendRow([
+      new Date(),
+      String(data.userId || ''),
+      String(data.requestId || ''),
+      String(data.question || ''),
+      String(data.selectedOption || ''),
+      data.isCorrect ? '正確' : '錯誤',
+      String(data.tag || ''),
+      String(data.source || '')
+    ]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
 }
